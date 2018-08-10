@@ -1,0 +1,134 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dice game common methods creates new player with given name 1`] = `
+Object {
+  "name": "Foo",
+  "throws": Array [],
+}
+`;
+
+exports[`Dice game game process after adding first player makes him as current 1`] = `
+Object {
+  "name": "Foo",
+  "throws": Array [],
+}
+`;
+
+exports[`Dice game game process creates new player with given name and stores it 1`] = `
+Array [
+  Object {
+    "name": "Foo",
+    "throws": Array [],
+  },
+]
+`;
+
+exports[`Dice game game process stops game after throw of last player in final round and marks someone as winner 1`] = `
+Object {
+  "currentPlayer": Object {
+    "name": "Foo",
+    "throws": Array [
+      Array [
+        1,
+        4,
+      ],
+      Array [
+        4,
+        4,
+      ],
+      Array [
+        4,
+        2,
+      ],
+      Array [
+        3,
+        5,
+      ],
+      Array [
+        1,
+        5,
+      ],
+    ],
+  },
+  "players": Array [
+    Object {
+      "name": "Foo",
+      "throws": Array [
+        Array [
+          1,
+          4,
+        ],
+        Array [
+          4,
+          4,
+        ],
+        Array [
+          4,
+          2,
+        ],
+        Array [
+          3,
+          5,
+        ],
+        Array [
+          1,
+          5,
+        ],
+      ],
+    },
+    Object {
+      "name": "Bar",
+      "throws": Array [
+        Array [
+          1,
+          4,
+        ],
+        Array [
+          4,
+          2,
+        ],
+        Array [
+          6,
+          1,
+        ],
+        Array [
+          5,
+          5,
+        ],
+        Array [
+          6,
+          1,
+        ],
+      ],
+    },
+  ],
+  "round": 6,
+  "winner": Object {
+    "name": "Bar",
+    "throws": Array [
+      Array [
+        1,
+        4,
+      ],
+      Array [
+        4,
+        2,
+      ],
+      Array [
+        6,
+        1,
+      ],
+      Array [
+        5,
+        5,
+      ],
+      Array [
+        6,
+        1,
+      ],
+    ],
+  },
+}
+`;
+
+exports[`Dice game initialization and instance specification by default creates with 5 rounds 1`] = `5`;
