@@ -1,128 +1,151 @@
 <script>
-import { isEmpty, random } from 'lodash/fp'
-import { StartDialog, FinishDialog, Score, Throwing } from 'components'
-import { Dice as DiceGame } from 'lib/dice'
+import { BetForm, TurnResult, Hash, Forecast, HashValidator, Player } from 'components'
+import { Game } from 'lib/game'
 
 export default {
   components: {
-    StartDialog,
-    FinishDialog,
-    Score,
-    Throwing,
+    BetForm,
+    Player,
+    TurnResult,
+    Hash,
+    HashValidator,
+    Forecast,
   },
 
   data: () => ({
     game: null,
-    rolling: false,
+    number: 50,
+    amount: 10,
+    validatingHash: false,
+    winner: false,
   }),
 
   computed: {
-    firstPlayer() {
-      return this.game.players[0]
+    played() {
+      return this.game.played
     },
 
-    secondPlayer() {
-      return this.game.players[1]
+    hash() {
+      return this.game.hash
     },
 
-    winner() {
-      return this.game.winner
+    balance() {
+      return this.game.balance
     },
 
-    round() {
-      return this.game.round
+    loForecast() {
+      return this.game.calculateForecast(this.number, 'lo')
     },
 
-    totalRounds() {
-      return this.game.rounds
-    },
+    hiForecast() {
+      return this.game.calculateForecast(this.number, 'hi')
+    }
+  },
 
-    buttonLabel() {
-      const { winner, round, totalRounds } = this
-
-      if (winner) {
-        return `${winner.name} 🎉`
-      }
-
-      return `Roll ${round}/${totalRounds} 🎲`
-    },
+  created() {
+    this.game = new Game()
+    this.game.startNew()
   },
 
   methods: {
-    onSubmitGameStart(body) {
-      const { playerA, playerB, rounds } = body
-
-      this.game = new DiceGame(rounds)
-      this.game.addPlayer(playerA)
-      this.game.addPlayer(playerB)
+    onStartValidate() {
+      this.validatingHash = true
     },
 
-    onFadeDices() {
-      this.rolling = false
+    onFinishValidate() {
+      this.validatingHash = false
     },
 
-    onClickRoll() {
-      if (!this.rolling) {
-        this.rolling = true
+    onChangeBetForm({ amount, number }) {
+      Object.assign(this, {
+        amount,
+        number,
+      })
+    },
 
-        setTimeout(() => {
-          this.game.turn()
-        }, 1000)
-      }
+    onBet(type) {
+      const { number, amount, game } = this
+
+      this.winner = game.makeBet(number, amount, type)
+    },
+
+    onLoadRequest() {
+      this.game.takeFreeCredits()
+    },
+
+    onRestart() {
+      this.game.startNew()
     },
   },
 }
 </script>
 
 <template>
-  <el-row class="game">
-    <StartDialog
-      v-if="!game"
-      @submit="onSubmitGameStart"
+  <main class="game">
+    <HashValidator
+      v-if="validatingHash"
+      :hash="hash"
+      @close="onFinishValidate"
     />
-    <template v-if="game">
-      <FinishDialog
-        v-if="winner"
-        :winner="winner"
-      />
-      <el-col :span="5">
-        <div class="game__aside left">
-          <Score
-            v-if="firstPlayer"
-            :player="firstPlayer"
+    <section class="game__board">
+      <div class="game__player">
+        <Player
+          :balance="balance"
+          @loan="onLoadRequest"
+        />
+      </div>
+      <div
+        v-if="played"
+        class="game__result"
+      >
+        <TurnResult
+          :win="winner"
+          :number="number"
+          @restart="onRestart"
+        />
+      </div>
+    </section>
+    <section class="game__controlls">
+      <el-row :gutter="15">
+        <el-col :span="5">
+          <Forecast
+            :forecast="loForecast"
+            :number="number"
+            :disabled="played"
+            type="lo"
+            @bet="onBet"
           />
-        </div>
-      </el-col>
-      <el-col :span="14">
-        <div class="game__main">
-          <div
-            v-if="rolling"
-            class="game__dices"
-          >
-            <Throwing @fade="onFadeDices" />
+        </el-col>
+        <el-col :span="14">
+          <div class="game__form">
+            <BetForm
+              :number="number"
+              :amount="amount"
+              :balance="game.balance"
+              :disabled="played"
+              @change="onChangeBetForm"
+            />
           </div>
-          <div class="game__start-button">
-            <el-button
-              :round="true"
-              :disabled="rolling || Boolean(winner)"
-              type="success"
-              @click="onClickRoll"
-            >
-              {{buttonLabel}}
-            </el-button>
+          <div class="game__hash">
+            <Hash
+              :show-validate="played"
+              :hash="game.hash"
+              @validate="onStartValidate"
+            />
           </div>
-        </div>
-      </el-col>
-      <el-col :span="5">
-        <div class="game__aside right">
-          <Score
-            v-if="secondPlayer"
-            :player="secondPlayer"
+        </el-col>
+        <el-col :span="5">
+          <Forecast
+            :forecast="hiForecast"
+            :number="number"
+            :disabled="played"
+            type="hi"
+            @bet="onBet"
           />
-        </div>
-      </el-col>
-    </template>
-  </el-row>
+        </el-col>
+      </el-row>
+    </section>
+  </main>
 </template>
 
 <style>
@@ -132,61 +155,39 @@ export default {
   box-sizing: border-box;
   font-family: monospace !important;
 }
-
-body {
-  overflow: hidden;
-}
 </style>
 
 <style lang="postcss">
-@keyframes throwing {
-  to {
-    top: 40vh;
-    opacity: 0;
-  }
-}
-
-.game__aside,
-.game__main {
-  height: 100vh;
-}
-
-.game__main {
+.game__board {
   position: relative;
+  height: 400px;
 }
 
-.game__aside {
-  overflow-y: auto;
-  box-shadow: 0 0px 20px 0 rgba(0, 0, 0, 0.25);
-
-  &.left {
-    border-right: 1px solid var(--lightBorder);
-  }
-
-  &.right {
-    border-left: 1px solid var(--lightBorder);
-  }
-}
-
-.game__start-button {
+.game__player,
+.game__result {
   position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-
-  & button {
-    font-size: 24px !important;
-  }
+  padding: 15px;
+  border: 1px solid var(--lightBorder);
+  border-radius: 5px;
 }
 
-.game__dices {
-  position: absolute;
-  top: -115px;
+.game__result {
   left: 50%;
-  transform: translateX(-50%);
-  animation-name: throwing;
-  animation-duration: 1.5s;
-  z-index: 1;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.game__player {
+  right: 15px;
+  top: 15px;
+}
+
+.game__controlls {
+  padding: 20px 20px 40px;
+  border-top: 1px solid var(--lightBorder);
+}
+
+.game__form {
+  margin-bottom: 35px;
 }
 </style>
