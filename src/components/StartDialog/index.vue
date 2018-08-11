@@ -9,22 +9,33 @@ export default {
 
   data: () => ({
     form: {
+      rounds: 5,
       playerA: null,
       playerB: null,
     },
     rules: {
+      rounds: [
+        {
+          validator: (rule, value, callback) => {
+            if (value <= 0) {
+              callback(new Error('Rounds count must be more 0!'))
+            }
+
+            callback()
+          },
+          trigger: 'change',
+        },
+      ],
       playerA: [
         {
           required: true,
-          validate: (rule, value, callback) =>
-            isEmpty(value) && callback(new Error('Enter first player name!')),
+          message: 'Enter first player name!',
         },
       ],
       playerB: [
         {
           required: true,
-          validate: (rule, value, callback) =>
-            isEmpty(value) && callback(new Error('Enter second player name!')),
+          message: 'Enter second player name!',
         },
       ],
     },
@@ -37,6 +48,7 @@ export default {
 
     onClickSubmit() {
       this.$refs.form.validate(valid => {
+        console.log(valid)
         if (valid) {
           this.emitSubmit()
         }
@@ -60,6 +72,16 @@ export default {
       :rules="rules"
       class="start-dialog__form"
     >
+      <el-form-item
+        label="Rounds count"
+        prop="rounds"
+      >
+        <el-input
+          v-model="form.rounds"
+          type="number"
+          min="1"
+        />
+      </el-form-item>
       <el-row :gutter="10">
         <el-col :span="12">
           <el-form-item

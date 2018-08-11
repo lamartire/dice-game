@@ -1,6 +1,6 @@
 <script>
 import { isEmpty, random } from 'lodash/fp'
-import { StartDialog, FinishDialog, Score } from 'components'
+import { StartDialog, FinishDialog, Score, Throwing } from 'components'
 import { Dice as DiceGame } from 'lib/dice'
 
 export default {
@@ -8,6 +8,7 @@ export default {
     StartDialog,
     FinishDialog,
     Score,
+    Throwing,
   },
 
   data: () => ({
@@ -16,10 +17,6 @@ export default {
   }),
 
   computed: {
-    awaitingPlayers() {
-      return isEmpty(this.game.players)
-    },
-
     firstPlayer() {
       return this.game.players[0]
     },
@@ -31,28 +28,46 @@ export default {
     winner() {
       return this.game.winner
     },
-  },
 
-  created() {
-    this.game = new DiceGame()
+    round() {
+      return this.game.round
+    },
+
+    totalRounds() {
+      return this.game.rounds
+    },
+
+    buttonLabel() {
+      const { winner, round, totalRounds } = this
+
+      if (winner) {
+        return `${winner.name} 🎉`
+      }
+
+      return `Roll ${round}/${totalRounds} 🎲`
+    },
   },
 
   methods: {
     onSubmitGameStart(body) {
-      const { playerA, playerB } = body
+      const { playerA, playerB, rounds } = body
 
+      this.game = new DiceGame(rounds)
       this.game.addPlayer(playerA)
       this.game.addPlayer(playerB)
     },
 
-    async onClickRoll() {
+    onFadeDices() {
+      this.rolling = false
+    },
+
+    onClickRoll() {
       if (!this.rolling) {
         this.rolling = true
 
         setTimeout(() => {
           this.game.turn()
-          this.rolling = false
-        }, random(250, 2000))
+        }, 1000)
       }
     },
   },
@@ -62,43 +77,51 @@ export default {
 <template>
   <el-row class="game">
     <StartDialog
-      v-if="awaitingPlayers"
+      v-if="!game"
       @submit="onSubmitGameStart"
     />
-    <FinishDialog
-      v-if="winner"
-      :winner="winner"
-    />
-    <el-col :span="5">
-      <div class="game__aside left">
-        <Score
-          v-if="firstPlayer"
-          :player="firstPlayer"
-        />
-      </div>
-    </el-col>
-    <el-col :span="14">
-      <div class="game__main">
-        <div class="game__start-button">
-          <el-button
-            :round="true"
-            :disabled="rolling"
-            type="success"
-            @click="onClickRoll"
-          >
-            Roll 🎲
-          </el-button>
+    <template v-if="game">
+      <FinishDialog
+        v-if="winner"
+        :winner="winner"
+      />
+      <el-col :span="5">
+        <div class="game__aside left">
+          <Score
+            v-if="firstPlayer"
+            :player="firstPlayer"
+          />
         </div>
-      </div>
-    </el-col>
-    <el-col :span="5">
-      <div class="game__aside right">
-        <Score
-          v-if="secondPlayer"
-          :player="secondPlayer"
-        />
-      </div>
-    </el-col>
+      </el-col>
+      <el-col :span="14">
+        <div class="game__main">
+          <div
+            v-if="rolling"
+            class="game__dices"
+          >
+            <Throwing @fade="onFadeDices" />
+          </div>
+          <div class="game__start-button">
+            <el-button
+              :round="true"
+              :disabled="rolling || Boolean(winner)"
+              type="success"
+              @click="onClickRoll"
+            >
+              {{buttonLabel}}
+            </el-button>
+          </div>
+        </div>
+      </el-col>
+      <el-col :span="5">
+        <div class="game__aside right">
+          <Score
+            v-if="secondPlayer"
+            :player="secondPlayer"
+          />
+        </div>
+      </el-col>
+    </template>
   </el-row>
 </template>
 
@@ -109,9 +132,20 @@ export default {
   box-sizing: border-box;
   font-family: monospace !important;
 }
+
+body {
+  overflow: hidden;
+}
 </style>
 
 <style lang="postcss">
+@keyframes throwing {
+  to {
+    top: 40vh;
+    opacity: 0;
+  }
+}
+
 .game__aside,
 .game__main {
   height: 100vh;
@@ -139,9 +173,20 @@ export default {
   bottom: 15px;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 2;
 
   & button {
     font-size: 24px !important;
   }
+}
+
+.game__dices {
+  position: absolute;
+  top: -115px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-name: throwing;
+  animation-duration: 1.5s;
+  z-index: 1;
 }
 </style>
