@@ -19,7 +19,7 @@ export default {
     disabled: {
       type: Boolean,
       required: false,
-    }
+    },
   },
 
   computed: {
@@ -33,18 +33,18 @@ export default {
 
     buttonLabel() {
       if (this.type === 'lo') {
-        return 'Bet lo'
+        return 'Bet Lo 👇'
       }
 
-      return 'Bet hi'
+      return 'Bet Hi 👆'
     },
   },
 
   methods: {
     emitBet() {
       this.$emit('bet', this.type)
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -73,8 +73,14 @@ export default {
 </template>
 
 <style lang="postcss">
+.forecat {
+  display: flex;
+  flex-direction: column;
+}
+
 .forecast__button {
   width: 100%;
+  margin-top: auto;
 }
 
 .forecast__label {

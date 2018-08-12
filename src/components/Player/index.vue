@@ -7,11 +7,17 @@ export default {
     },
   },
 
+  computed: {
+    fixedBalance() {
+      return this.balance.toFixed(2)
+    },
+  },
+
   methods: {
     emitLoan() {
       this.$emit('loan')
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -21,7 +27,7 @@ export default {
       src="../../assets/images/avatar.png"
       class="player__avatar"
     >
-    <p class="player__balance">Balance: 💰{{balance}}</p>
+    <p class="player__balance">Balance: 💰{{fixedBalance}}</p>
     <el-button
       :disabled="balance > 0"
       type="primary"

@@ -4,7 +4,7 @@ export default {
     hash: {
       type: String,
       required: true,
-    }
+    },
   },
 
   data: () => ({
@@ -29,12 +29,13 @@ export default {
         })
       } else {
         this.$message({
-          message: 'Your hash is not valid! Are you had some attempts to trick game? 🤔',
+          message:
+            'Your hash is not valid! Are you had some attempts to trick game? 🤔',
           type: 'error',
         })
       }
-    }
-  }
+    },
+  },
 }
 </script>
 

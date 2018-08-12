@@ -1,5 +1,12 @@
 <script>
-import { BetForm, TurnResult, Hash, Forecast, HashValidator, Player } from 'components'
+import {
+  BetForm,
+  TurnResult,
+  Hash,
+  Forecast,
+  HashValidator,
+  Player,
+} from 'components'
 import { Game } from 'lib/game'
 
 export default {
@@ -13,6 +20,7 @@ export default {
   },
 
   data: () => ({
+    storageKey: 'dice-game:balance',
     game: null,
     number: 50,
     amount: 10,
@@ -39,15 +47,31 @@ export default {
 
     hiForecast() {
       return this.game.calculateForecast(this.number, 'hi')
-    }
+    },
   },
 
   created() {
+    const lastPlayerBalance = this.loadPlayerBalance()
+
     this.game = new Game()
     this.game.startNew()
+
+    if (lastPlayerBalance) {
+      this.game.setBalance(lastPlayerBalance)
+    }
   },
 
   methods: {
+    loadPlayerBalance() {
+      const balance = localStorage.getItem(this.storageKey)
+
+      return balance ? parseInt(balance) : null
+    },
+
+    savePlayerBalance() {
+      localStorage.setItem(this.storageKey, this.balance)
+    },
+
     onStartValidate() {
       this.validatingHash = true
     },
@@ -67,6 +91,7 @@ export default {
       const { number, amount, game } = this
 
       this.winner = game.makeBet(number, amount, type)
+      this.savePlayerBalance()
     },
 
     onLoadRequest() {
@@ -87,64 +112,60 @@ export default {
       :hash="hash"
       @close="onFinishValidate"
     />
-    <section class="game__board">
-      <div class="game__player">
-        <Player
-          :balance="balance"
-          @loan="onLoadRequest"
-        />
-      </div>
-      <div
-        v-if="played"
-        class="game__result"
-      >
-        <TurnResult
-          :win="winner"
-          :number="number"
-          @restart="onRestart"
-        />
-      </div>
-    </section>
-    <section class="game__controlls">
+    <div class="game__section">
+      <Player
+        :balance="balance"
+        @loan="onLoadRequest"
+      />
+    </div>
+    <div class="game__section">
       <el-row :gutter="15">
-        <el-col :span="5">
+        <el-col :span="8">
           <Forecast
             :forecast="loForecast"
             :number="number"
-            :disabled="played"
+            :disabled="played || balance <= 0"
             type="lo"
             @bet="onBet"
           />
         </el-col>
-        <el-col :span="14">
-          <div class="game__form">
-            <BetForm
-              :number="number"
-              :amount="amount"
-              :balance="game.balance"
-              :disabled="played"
-              @change="onChangeBetForm"
-            />
-          </div>
-          <div class="game__hash">
-            <Hash
-              :show-validate="played"
-              :hash="game.hash"
-              @validate="onStartValidate"
+        <el-col :span="8">
+          <div class="game__section">
+            <TurnResult
+              :win="winner"
+              :number="game.number"
+              :played="played"
+              @restart="onRestart"
             />
           </div>
         </el-col>
-        <el-col :span="5">
+        <el-col :span="8">
           <Forecast
             :forecast="hiForecast"
             :number="number"
-            :disabled="played"
+            :disabled="played || balance <= 0"
             type="hi"
             @bet="onBet"
           />
         </el-col>
       </el-row>
-    </section>
+    </div>
+    <div class="game__section">
+      <BetForm
+        :number="number"
+        :amount="amount"
+        :balance="game.balance"
+        :disabled="played"
+        @change="onChangeBetForm"
+      />
+    </div>
+    <div class="game__section">
+      <Hash
+        :show-validate="played"
+        :hash="game.hash"
+        @validate="onStartValidate"
+      />
+    </div>
   </main>
 </template>
 
@@ -158,36 +179,21 @@ export default {
 </style>
 
 <style lang="postcss">
-.game__board {
-  position: relative;
-  height: 400px;
+.game {
+  padding: 15px;
 }
 
-.game__player,
-.game__result {
-  position: absolute;
+.game__section {
   padding: 15px;
   border: 1px solid var(--lightBorder);
   border-radius: 5px;
-}
-
-.game__result {
-  left: 50%;
-  top: 50%;
-  transform: translateX(-50%) translateY(-50%);
-}
-
-.game__player {
-  right: 15px;
-  top: 15px;
+  margin-bottom: 15px;
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .game__controlls {
   padding: 20px 20px 40px;
-  border-top: 1px solid var(--lightBorder);
-}
-
-.game__form {
-  margin-bottom: 35px;
 }
 </style>

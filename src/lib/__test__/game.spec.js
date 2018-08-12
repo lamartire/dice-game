@@ -53,6 +53,13 @@ describe('pure methods', () => {
 })
 
 describe('methods with side-effects', () => {
+  it('setBalance: changes balance with given value', () => {
+    const game = new Game()
+
+    game.setBalance(200)
+
+    expect(game.balance).toEqual(200)
+  })
   describe('takeFreeCredits', () => {
     const game = new Game()
 
@@ -130,11 +137,26 @@ describe('methods with side-effects', () => {
       }
     })
 
-    it('calls process bet if player won', () => {
-      game.number = 50
-      game.makeBet(10, 50, 'lo')
+    it('withdraw amount if player lost and returns false', () => {
+      const game = new Game()
 
-      expect(game.balance).toEqual(600)
+      game.number = 50
+
+      const betRes = game.makeBet(50, 10, 'lo')
+
+      expect(game.balance).toEqual(90)
+      expect(betRes).toBeFalsy()
+    })
+
+    it('add amount if player win and returns true', () => {
+      const game = new Game()
+
+      game.number = 50
+
+      const betRes = game.makeBet(49, 10, 'hi')
+
+      expect(game.balance).toEqual(119.6)
+      expect(betRes).toBeTruthy()
     })
   })
 

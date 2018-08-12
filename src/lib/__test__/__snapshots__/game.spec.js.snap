@@ -1,13 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`methods with side-effects changeBet create a bet with given number and set it to currentBet 1`] = `
-Object {
-  "amount": 40,
-  "destination": "lo",
-  "number": 20,
-}
-`;
-
 exports[`pure methods calculateForecast: returns expected chance and payout Bet 1 Hi Chance of Winning 99% Payout: 1.01x 1`] = `
 Object {
   "chance": 99,
@@ -61,13 +53,5 @@ exports[`pure methods calculateForecast: returns expected chance and payout Bet 
 Object {
   "chance": 99,
   "payout": 1.01,
-}
-`;
-
-exports[`pure methods createBet: returns a bet object 1`] = `
-Object {
-  "amount": 40,
-  "destination": "lo",
-  "number": 1,
 }
 `;

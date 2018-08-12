@@ -31,6 +31,24 @@ export default {
     },
   }),
 
+  computed: {
+    maxAmountValue() {
+      if (this.balance <= 0) {
+        return 0
+      }
+
+      return this.balance
+    },
+  },
+
+  watch: {
+    balance() {
+      if (this.balance === 0 || this.balance < 0) {
+        this.form.amount = 0
+      }
+    },
+  },
+
   created() {
     Object.assign(this.form, pick(['amount', 'number'], this))
   },
@@ -38,8 +56,8 @@ export default {
   methods: {
     emitChange() {
       this.$emit('change', this.form)
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -58,7 +76,7 @@ export default {
           v-model="form.number"
           :max="99"
           :min="1"
-          :disabled="disabled"
+          :disabled="disabled || balance <= 0"
           class="bet-form__slider"
           @change="emitChange"
         />
@@ -73,9 +91,9 @@ export default {
       <div class="bet-form__slider">
         <el-slider
           v-model="form.amount"
-          :max="balance"
+          :max="maxAmountValue"
           :min="1"
-          :disabled="disabled"
+          :disabled="disabled || balance <= 0"
           class="bet-form__slider"
           @change="emitChange"
         />
@@ -85,12 +103,6 @@ export default {
 </template>
 
 <style lang="postcss">
-.bet-form {
-  padding: 15px;
-  border: 1px solid var(--lightBorder);
-  border-radius: 5px;
-}
-
 .bet-form__field {
   display: flex;
   align-items: center;

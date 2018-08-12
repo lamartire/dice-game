@@ -9,32 +9,44 @@ export default {
     number: {
       type: Number,
       required: true,
-    }
+    },
+
+    played: {
+      type: Boolean,
+      required: false,
+    },
   },
 
   computed: {
     label() {
-      if (this.win) {
-        return 'You win! 🎉'
+      if (!this.played) {
+        return '🤔'
       }
 
-      return 'You lose! 😥'
-    }
+      if (this.win) {
+        return `${this.number} win!`
+      }
+
+      return `${this.number} lose!`
+    },
   },
 
   methods: {
     emitRestart() {
       this.$emit('restart')
-    }
-  }
+    },
+  },
 }
 </script>
 
 <template>
   <section class="turn-result">
-    <h3 class="turn-result__score">{{number}}</h3>
-    <p class="turn-result__label">{{label}}</p>
+    <h3 class="turn-result__score">{{label}}</h3>
+    <p v-if="!played">
+      Try to make a bet
+    </p>
     <el-button
+      v-if="played"
       type="primary"
       @click="emitRestart"
     >
@@ -46,10 +58,6 @@ export default {
 <style lang="postcss">
 .turn-result {
   text-align: center;
-}
-
-.turn-result__label {
-  margin-bottom: 20px;
 }
 
 .turn-result__score {

@@ -19,6 +19,10 @@ export class Game {
     return random(0, 100)
   }
 
+  setBalance(amount) {
+    this.balance = amount
+  }
+
   takeFreeCredits() {
     if (this.balance > 0) {
       throw new Error('Free credits avilable only if balance equals to 0!')
@@ -59,16 +63,16 @@ export class Game {
 
     this.played = true
 
-    if (destination === 'lo' && this.number >= number) {
+    if (destination === 'lo' && this.number < number && number > 0) {
       this.processBet(number, amount, destination)
 
       return true
-    } else if (destination === 'hi' && this.number <= number) {
+    } else if (destination === 'hi' && this.number > number) {
       this.processBet(number, amount, destination)
 
       return true
     } else {
-      this.withdrawBetAmount(number, amount)
+      this.withdrawBetAmount(amount)
 
       return false
     }

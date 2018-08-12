@@ -9,14 +9,14 @@ export default {
     showValidate: {
       type: Boolean,
       required: false,
-    }
+    },
   },
 
   methods: {
     emitValidate() {
       this.$emit('validate')
-    }
-  }
+    },
+  },
 }
 </script>
 
