@@ -7,6 +7,7 @@ export class Game {
     this.number = null
     this.hash = null
     this.played = false
+    this.history = []
   }
 
   startNew() {
@@ -61,21 +62,25 @@ export class Game {
       throw new Error('Number must not be less than 1!')
     }
 
+    let betResult = false
+
     this.played = true
 
     if (destination === 'lo' && this.number < number && number > 0) {
       this.processBet(number, amount, destination)
 
-      return true
+      betResult = true
     } else if (destination === 'hi' && this.number > number) {
       this.processBet(number, amount, destination)
 
-      return true
+      betResult = true
     } else {
       this.withdrawBetAmount(amount)
-
-      return false
     }
+
+    this.createHistoryEntry(number, amount, betResult)
+
+    return betResult
   }
 
   processBet(number, amount, destination) {
@@ -86,5 +91,25 @@ export class Game {
 
   withdrawBetAmount(amount) {
     this.balance = this.balance - amount
+  }
+
+  createHistoryEntry(number, amount, result) {
+    this.history.push({
+      number: number,
+      amount: amount,
+      result: `${this.number} ${result ? 'WIN' : 'LOSE'}`,
+      hash: this.hash,
+      total: this.balance,
+    })
+  }
+
+  betMultiple(number, amount, destination, iterations) {
+    let i = 0
+
+    while (i < iterations) {
+      this.makeBet(number, amount, destination)
+      this.startNew()
+      i++
+    }
   }
 }

@@ -60,6 +60,35 @@ describe('methods with side-effects', () => {
 
     expect(game.balance).toEqual(200)
   })
+
+  it('processBet: increase user balance by amount * payout', () => {
+    const game = new Game()
+
+    game.processBet(10, 50, 'lo')
+
+    expect(game.balance).toEqual(600)
+  })
+
+  it('withdrawBetAmount: descrease player balance by bet amount', () => {
+    const game = new Game()
+
+    game.withdrawBetAmount(20)
+
+    expect(game.balance).toEqual(80)
+  })
+
+  it('createHistoryEntry: creates history entry in game history with given parameters', () => {
+    const game = new Game()
+
+    game.startNew()
+    game.createHistoryEntry(1, 10, true)
+
+    expect(game.history[0]).toMatchSnapshot({
+      hash: expect.any(String),
+      result: expect.any(String),
+    })
+  })
+
   describe('takeFreeCredits', () => {
     const game = new Game()
 
@@ -92,14 +121,6 @@ describe('methods with side-effects', () => {
     it('generated hash can be validated by validateHash', () => {
       expect(game.validateHash(game.hash)).toBeTruthy()
     })
-  })
-
-  it('processBet: increase user balance by amount * payout', () => {
-    const game = new Game()
-
-    game.processBet(10, 50, 'lo')
-
-    expect(game.balance).toEqual(600)
   })
 
   describe('makeBet', () => {
@@ -160,11 +181,13 @@ describe('methods with side-effects', () => {
     })
   })
 
-  it('withdrawBetAmount: descrease player balance by bet amount', () => {
-    const game = new Game()
+  describe('betMultiple', () => {
+    it('makes bets balance not equals 0 or iteration count left', () => {
+      const game = new Game()
 
-    game.withdrawBetAmount(20)
+      game.betMultiple(1, 1, 'lo', 3)
 
-    expect(game.balance).toEqual(80)
+      expect(game.history).toHaveLength(3)
+    })
   })
 })

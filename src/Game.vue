@@ -6,6 +6,8 @@ import {
   Forecast,
   HashValidator,
   Player,
+  History,
+  BetBot,
 } from 'components'
 import { Game } from 'lib/game'
 
@@ -17,6 +19,8 @@ export default {
     Hash,
     HashValidator,
     Forecast,
+    History,
+    BetBot,
   },
 
   data: () => ({
@@ -47,6 +51,10 @@ export default {
 
     hiForecast() {
       return this.game.calculateForecast(this.number, 'hi')
+    },
+
+    history() {
+      return this.game.history
     },
   },
 
@@ -96,6 +104,26 @@ export default {
 
     onLoadRequest() {
       this.game.takeFreeCredits()
+    },
+
+    onSubmitBetBot(body) {
+      try {
+        const { number, amount, game } = this
+
+        game.betMultiple(number, amount, body.direction, body.iterations)
+
+        this.$message({
+          message: 'All iterations passed! Look at history for more details!',
+          type: 'success',
+        })
+      } catch (err) {
+        this.$message({
+          message: 'Something went wrong!  Check your balance.',
+          type: 'error',
+        })
+
+        this.amount = 0
+      }
     },
 
     onRestart() {
@@ -158,6 +186,15 @@ export default {
         :disabled="played"
         @change="onChangeBetForm"
       />
+    </div>
+    <div class="game__section">
+      <BetBot
+        :balance="balance"
+        @submit="onSubmitBetBot"
+      />
+    </div>
+    <div class="game__section">
+      <History :history="history" />
     </div>
     <div class="game__section">
       <Hash

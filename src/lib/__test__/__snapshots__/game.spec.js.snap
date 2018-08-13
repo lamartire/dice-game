@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`methods with side-effects createHistoryEntry: creates history entry in game history with given parameters 1`] = `
+Object {
+  "amount": 10,
+  "hash": Any<String>,
+  "number": 1,
+  "result": Any<String>,
+  "total": 100,
+}
+`;
+
 exports[`pure methods calculateForecast: returns expected chance and payout Bet 1 Hi Chance of Winning 99% Payout: 1.01x 1`] = `
 Object {
   "chance": 99,
